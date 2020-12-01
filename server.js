@@ -50,8 +50,8 @@ io.on('connection', socket => {
     });
     ghosts[index].position = { x: data.position.x, y: data.position.y };
     ghosts[index].isInClock = data.isInClock;
-    let copy = ghosts.slice(0).splice(index, 1);
-    // copy.splice(index, 1);
+    let copy = ghosts.slice(0);
+    copy.splice(index, 1);
     socket.emit('ghostArray', copy);
     let ghostsInClock = _.sum(ghosts.map(item => item.isInClock));
     socket.broadcast.emit('ghostsInClock', ghostsInClock);
