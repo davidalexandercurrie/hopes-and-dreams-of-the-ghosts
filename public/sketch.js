@@ -14,12 +14,21 @@ function setup() {
 }
 function draw() {
   background(200);
-  myGhost.move();
-  myGhost.show();
+  updateOtherGhosts();
+  updateMyGhost();
+}
+
+function updateOtherGhosts() {
   otherGhosts.forEach(element => {
     element.ghostReady ? element.show() : null;
   });
-  frameCount % 10 === 0 ? sendPosition() : null;
+}
+
+function updateMyGhost() {
+  // myGhost.move();
+  moveMyGhost();
+  myGhost.show();
+  sendPosition();
 }
 
 function ghostArrayMessage(data) {
@@ -63,4 +72,19 @@ function sendPosition() {
     position: { x: myGhost.position.x, y: myGhost.position.y },
   };
   socket.emit('position', data);
+}
+
+function moveMyGhost() {
+  if (keyIsDown(87)) {
+    myGhost.move(createVector(0, -5));
+  }
+  if (keyIsDown(65)) {
+    myGhost.move(createVector(-5, 0));
+  }
+  if (keyIsDown(83)) {
+    myGhost.move(createVector(0, 5));
+  }
+  if (keyIsDown(68)) {
+    myGhost.move(createVector(5, 0));
+  }
 }
