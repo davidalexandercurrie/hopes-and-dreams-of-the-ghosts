@@ -3,6 +3,7 @@ let otherGhosts = [];
 let socket;
 let positionGhostsArray;
 let clock = {};
+let allTimeGhostCounter;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -18,6 +19,7 @@ function draw() {
   drawEnvironment();
   updateOtherGhosts();
   updateMyGhost();
+  displayAllTimeGhostCounter();
 }
 
 function updateOtherGhosts() {
@@ -59,14 +61,16 @@ function disconnectedGhostMessage(data) {
 function connectedGhostMessage(data) {
   console.log('ghost connected', data);
   otherGhosts.push(new Ghost('', '', data, false));
+  allTimeGhostCounter++;
 }
 
 function initExistingGhosts(data) {
-  data.forEach(element => {
+  data.ghosts.forEach(element => {
     otherGhosts.push(
       new Ghost(element.position.x, element.position.y, element.id, false)
     );
   });
+  allTimeGhostCounter = data.allTimeGhostCounter;
 }
 
 function sendMyGhostData() {
@@ -108,4 +112,19 @@ function drawClock() {
 function drawEnvironment() {
   background(200);
   drawClock();
+}
+
+function displayAllTimeGhostCounter() {
+  textAlign(LEFT, CENTER);
+  textSize(30);
+  noStroke();
+  rectMode(CORNER);
+  fill(255);
+  rect(0, 0, width, 40);
+  fill(0);
+  text(`All Time Ghost Counter: ${allTimeGhostCounter}`, 10, 20);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }

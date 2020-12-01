@@ -21,6 +21,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "lodash": "^4.17.20",
+    "nedb": "^1.8.0",
     "socket.io": "^3.0.3"
   }
 }

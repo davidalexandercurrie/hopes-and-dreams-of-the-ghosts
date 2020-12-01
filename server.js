@@ -2,6 +2,21 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const _ = require('lodash');
+const Datastore = require('nedb'),
+  db = new Datastore('database.db');
+db.loadDatabase(function (error) {
+  if (error) {
+    console.log(
+      'FATAL: local database could not be loaded. Caused by: ' + error
+    );
+    throw error;
+  }
+  console.log('INFO: local database loaded successfully.');
+});
+let allTimeGhostCounter;
+db.find({ prop: 'allTimeGhostCounter' }, function (err, docs) {
+  allTimeGhostCounter = docs[0].count;
+});
 const options = {
   /* ... */
 };
@@ -22,6 +37,7 @@ http.listen(process.env.PORT || 3000, process.env.IP, () => {
 // on connect initialise a space in the ghost Array
 io.on('connection', socket => {
   console.log(socket.id + ' connected');
+  incrementGhostCounter();
   ghosts.push({
     id: socket.id,
     position: {
@@ -30,7 +46,10 @@ io.on('connection', socket => {
     },
     isInClock: false,
   });
-  socket.emit('connection', ghosts);
+  let data = {
+    ghosts,
+  };
+  socket.emit('connection', data);
   socket.broadcast.emit('ghostConnected', socket.id);
 
   // when a ghost disconnects
@@ -57,3 +76,13 @@ io.on('connection', socket => {
     socket.broadcast.emit('ghostsInClock', ghostsInClock);
   });
 });
+
+function incrementGhostCounter() {
+  db.update(
+    { prop: 'allTimeGhostCounter' },
+    { $inc: { count: 1 } },
+    { upsert: true },
+    function () {}
+  );
+  allTimeGhostCounter++;
+}
