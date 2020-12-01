@@ -2,6 +2,7 @@ let myGhost;
 let otherGhosts = [];
 let socket;
 let positionGhostsArray;
+let clock = {};
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -11,9 +12,10 @@ function setup() {
   socket.on('ghostConnected', connectedGhostMessage);
   socket.on('ghostDisconnected', disconnectedGhostMessage);
   myGhost = new Ghost(random(0, 200), random(0, 200), 'myGhost', true);
+  createClock();
 }
 function draw() {
-  background(200);
+  drawEnvironment();
   updateOtherGhosts();
   updateMyGhost();
 }
@@ -28,7 +30,7 @@ function updateMyGhost() {
   // myGhost.move();
   moveMyGhost();
   myGhost.show();
-  sendPosition();
+  sendMyGhostData();
 }
 
 function ghostArrayMessage(data) {
@@ -67,9 +69,10 @@ function initExistingGhosts(data) {
   });
 }
 
-function sendPosition() {
+function sendMyGhostData() {
   var data = {
     position: { x: myGhost.position.x, y: myGhost.position.y },
+    isInClock: myGhost.isInClock() ? 1 : 0,
   };
   socket.emit('position', data);
 }
@@ -87,4 +90,22 @@ function moveMyGhost() {
   if (keyIsDown(68)) {
     myGhost.move(createVector(5, 0));
   }
+}
+
+function createClock() {
+  clock = {
+    position: createVector(400, 400),
+    numberOfGhostsInClock: 0,
+  };
+}
+
+function drawClock() {
+  textAlign(CENTER, CENTER);
+  textSize(240);
+  text('⏰', clock.position.x, clock.position.y);
+}
+
+function drawEnvironment() {
+  background(200);
+  drawClock();
 }

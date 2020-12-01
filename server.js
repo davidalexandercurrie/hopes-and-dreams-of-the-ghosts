@@ -1,12 +1,16 @@
-var express = require('express');
-var app = express();
-var http = require('http').createServer(app);
+const express = require('express');
+const app = express();
+const http = require('http').createServer(app);
+const _ = require('lodash');
 const options = {
   /* ... */
 };
 const io = require('socket.io')(http, options);
 
 let ghosts = [];
+let clock = {
+  ghostsInClock: 0,
+};
 
 // routes
 app.use('/', express.static('public'));
@@ -24,6 +28,7 @@ io.on('connection', socket => {
       x: '',
       y: '',
     },
+    isInClock: false,
   });
   socket.emit('connection', ghosts);
   socket.broadcast.emit('ghostConnected', socket.id);
@@ -44,9 +49,11 @@ io.on('connection', socket => {
       return item.id === socket.id;
     });
     ghosts[index].position = { x: data.position.x, y: data.position.y };
-    let copy = ghosts.slice(0);
-    copy.splice(index, 1);
-
+    ghosts[index].isInClock = data.isInClock;
+    let copy = ghosts.slice(0).splice(index, 1);
+    // copy.splice(index, 1);
     socket.emit('ghostArray', copy);
+    let ghostsInClock = _.sum(ghosts.map(item => item.isInClock));
+    socket.broadcast.emit('ghostsInClock', ghostsInClock);
   });
 });
