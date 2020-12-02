@@ -12,7 +12,7 @@ function setup() {
   socket.on('ghostArray', ghostArrayMessage);
   socket.on('ghostConnected', connectedGhostMessage);
   socket.on('ghostDisconnected', disconnectedGhostMessage);
-  myGhost = new Ghost(random(0, 200), random(0, 200), 'myGhost', true);
+  myGhost = new Ghost(random(0, 200), random(0, 200), 'myGhost', false);
   createClock();
 }
 function draw() {
@@ -63,6 +63,7 @@ function connectedGhostMessage(data) {
 }
 
 function initExistingGhosts(data) {
+  myGhost.ghostReady = true;
   data.ghosts.forEach(element => {
     otherGhosts.push(
       new Ghost(element.position.x, element.position.y, element.id, false)
@@ -72,11 +73,13 @@ function initExistingGhosts(data) {
 }
 
 function sendMyGhostData() {
-  var data = {
-    position: { x: myGhost.position.x, y: myGhost.position.y },
-    isInClock: myGhost.isInClock() ? 1 : 0,
-  };
-  socket.emit('position', data);
+  if (myGhost.ghostReady) {
+    var data = {
+      position: { x: myGhost.position.x, y: myGhost.position.y },
+      isInClock: myGhost.isInClock() ? 1 : 0,
+    };
+    socket.emit('position', data);
+  }
 }
 
 function moveMyGhost() {
