@@ -21,12 +21,12 @@ firebase.initializeApp(firebaseConfig);
 
 const database = firebase.database();
 
-let ref = database.ref('ghosts');
+let ref = database.ref('statistics');
 ref.on('value', gotData, errData);
 let allTimeGhostCounter;
 
 function gotData(data) {
-  allTimeGhostCounter = data.val().statistics.allTimeGhostCounter;
+  allTimeGhostCounter = data.val().allTimeGhostCounter;
   console.log(allTimeGhostCounter);
 }
 
@@ -96,8 +96,7 @@ io.on('connection', socket => {
 });
 
 function incrementGhostCounter() {
-  var usersRef = ref.child('statistics');
-  usersRef.set({
+  ref.set({
     allTimeGhostCounter: firebase.database.ServerValue.increment(1),
   });
   allTimeGhostCounter++;

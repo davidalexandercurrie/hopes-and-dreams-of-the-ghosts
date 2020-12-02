@@ -29,14 +29,12 @@ function updateOtherGhosts() {
 }
 
 function updateMyGhost() {
-  // myGhost.move();
   moveMyGhost();
   myGhost.show();
   sendMyGhostData();
 }
 
 function ghostArrayMessage(data) {
-  // console.log('positions', data);
   data.forEach(element => {
     let index = otherGhosts.findIndex(function (item) {
       return item.id === element.id;
