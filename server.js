@@ -40,11 +40,11 @@ const options = {
 const io = require('socket.io')(http, options);
 
 let ghosts = [];
-let clock = {
+let sendToMax = {
+  ghostsInBook: 0,
   ghostsInClock: 0,
+  ghostsInLightbulb: 0,
 };
-let numGhostsConnected = 0;
-let sendToMax = {};
 let startSendingToMax = true;
 
 // routes
