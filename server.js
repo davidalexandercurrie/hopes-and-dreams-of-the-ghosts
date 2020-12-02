@@ -43,6 +43,9 @@ let ghosts = [];
 let clock = {
   ghostsInClock: 0,
 };
+let numGhostsConnected = 0;
+let sendToMax = {};
+let startSendingToMax = true;
 
 // routes
 app.use('/', express.static('public'));
@@ -62,6 +65,8 @@ io.on('connection', socket => {
       y: '',
     },
     isInClock: false,
+    isInBook: false,
+    isInLightbulb: false,
   });
   let data = {
     ghosts,
@@ -87,11 +92,24 @@ io.on('connection', socket => {
     });
     ghosts[index].position = { x: data.position.x, y: data.position.y };
     ghosts[index].isInClock = data.isInClock;
+    ghosts[index].isInBook = data.isInBook;
+    ghosts[index].isInLightbulb = data.isInLightbulb;
     let copy = ghosts.slice(0);
     copy.splice(index, 1);
     socket.emit('ghostArray', copy);
-    let ghostsInClock = _.sum(ghosts.map(item => item.isInClock));
-    socket.broadcast.emit('ghostsInClock', ghostsInClock);
+    sendToMax.ghostsInClock = _.sum(ghosts.map(item => item.isInClock));
+    sendToMax.ghostsInBook = _.sum(ghosts.map(item => item.isInBook));
+    sendToMax.ghostsInLightbulb = _.sum(ghosts.map(item => item.isInLightbulb));
+
+    if (startSendingToMax) {
+      startSendingToMax = false;
+      setInterval(() => {
+        sendToMax.numGhostsConnected = io.engine.clientsCount;
+        socket.broadcast.emit('maxSocket', sendToMax);
+        console.log(sendToMax);
+        // socket send to max
+      }, 100);
+    }
   });
 });
 

@@ -3,6 +3,8 @@ let otherGhosts = [];
 let socket;
 let positionGhostsArray;
 let clock = {};
+let book = {};
+let lightbulb = {};
 let allTimeGhostCounter;
 
 function setup() {
@@ -14,6 +16,8 @@ function setup() {
   socket.on('ghostDisconnected', disconnectedGhostMessage);
   myGhost = new Ghost(random(0, 200), random(0, 200), 'myGhost', false);
   createClock();
+  createBook();
+  createLightbulb();
 }
 function draw() {
   drawEnvironment();
@@ -77,6 +81,8 @@ function sendMyGhostData() {
     var data = {
       position: { x: myGhost.position.x, y: myGhost.position.y },
       isInClock: myGhost.isInClock() ? 1 : 0,
+      isInBook: myGhost.isInBook() ? 1 : 0,
+      isInLightbulb: myGhost.isInLightbulb() ? 1 : 0,
     };
     socket.emit('position', data);
   }
@@ -109,10 +115,36 @@ function drawClock() {
   textSize(240);
   text('⏰', clock.position.x, clock.position.y);
 }
+function createBook() {
+  book = {
+    position: createVector(800, 200),
+    numberOfGhostsInBook: 0,
+  };
+}
+
+function drawBook() {
+  textAlign(CENTER, CENTER);
+  textSize(240);
+  text('📓', book.position.x, book.position.y);
+}
+function createLightbulb() {
+  lightbulb = {
+    position: createVector(200, 800),
+    numberOfGhostsInLightbulb: 0,
+  };
+}
+
+function drawLightbulb() {
+  textAlign(CENTER, CENTER);
+  textSize(240);
+  text('💡', lightbulb.position.x, lightbulb.position.y);
+}
 
 function drawEnvironment() {
   background(200);
   drawClock();
+  drawBook();
+  drawLightbulb();
 }
 
 function displayAllTimeGhostCounter() {

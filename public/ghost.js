@@ -7,7 +7,9 @@ class Ghost {
   }
   show() {
     this.styleGhost();
-    this.isInClock() ? this.insideObject() : this.outsideObject();
+    this.isInClock() || this.isInBook() || this.isInLightbulb()
+      ? this.insideObject()
+      : this.outsideObject();
     this.drawGhost();
   }
   move(movementVector) {
@@ -24,6 +26,26 @@ class Ghost {
     return dist(
       clock.position.x,
       clock.position.y,
+      this.position.x,
+      this.position.y
+    ) < 120
+      ? true
+      : false;
+  }
+  isInBook() {
+    return dist(
+      book.position.x,
+      book.position.y,
+      this.position.x,
+      this.position.y
+    ) < 120
+      ? true
+      : false;
+  }
+  isInLightbulb() {
+    return dist(
+      lightbulb.position.x,
+      lightbulb.position.y,
       this.position.x,
       this.position.y
     ) < 120
