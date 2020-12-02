@@ -99,5 +99,4 @@ function incrementGhostCounter() {
   ref.set({
     allTimeGhostCounter: firebase.database.ServerValue.increment(1),
   });
-  allTimeGhostCounter++;
 }
