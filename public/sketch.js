@@ -115,14 +115,16 @@ function drawEnvironment() {
 }
 
 function displayAllTimeGhostCounter() {
-  textAlign(LEFT, CENTER);
-  textSize(30);
-  noStroke();
-  rectMode(CORNER);
-  fill(255);
-  rect(0, 0, width, 40);
-  fill(0);
-  text(`All Time Ghost Counter: ${allTimeGhostCounter}`, 10, 20);
+  if (allTimeGhostCounter != undefined) {
+    textAlign(LEFT, CENTER);
+    textSize(30);
+    noStroke();
+    rectMode(CORNER);
+    fill(255);
+    rect(0, 0, width, 40);
+    fill(0);
+    text(`All Time Ghost Counter: ${allTimeGhostCounter}`, 10, 20);
+  }
 }
 
 function windowResized() {

@@ -2,21 +2,38 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const _ = require('lodash');
-const Datastore = require('nedb'),
-  db = new Datastore('database.db');
-db.loadDatabase(function (error) {
-  if (error) {
-    console.log(
-      'FATAL: local database could not be loaded. Caused by: ' + error
-    );
-    throw error;
-  }
-  console.log('INFO: local database loaded successfully.');
-});
+const firebase = require('firebase');
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: 'AIzaSyBglEP4rIByR3UZKtlj4pff7l4bUNapvmQ',
+  authDomain: 'spooky-ghosts-data.firebaseapp.com',
+  databaseURL: 'https://spooky-ghosts-data.firebaseio.com',
+  projectId: 'spooky-ghosts-data',
+  storageBucket: 'spooky-ghosts-data.appspot.com',
+  messagingSenderId: '1067223608961',
+  appId: '1:1067223608961:web:d54fde92c4dd1728a7a780',
+  measurementId: 'G-Y7XV2F8KQD',
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+// firebase.analytics();
+
+const database = firebase.database();
+
+let ref = database.ref('ghosts');
+ref.on('value', gotData, errData);
 let allTimeGhostCounter;
-db.find({ prop: 'allTimeGhostCounter' }, function (err, docs) {
-  allTimeGhostCounter = docs[0].count;
-});
+
+function gotData(data) {
+  allTimeGhostCounter = data.val().statistics.allTimeGhostCounter;
+  console.log(allTimeGhostCounter);
+}
+
+function errData(err) {
+  console.log('firebase error', err);
+}
+
 const options = {
   /* ... */
 };
@@ -48,6 +65,7 @@ io.on('connection', socket => {
   });
   let data = {
     ghosts,
+    allTimeGhostCounter,
   };
   socket.emit('connection', data);
   socket.broadcast.emit('ghostConnected', socket.id);
@@ -78,11 +96,9 @@ io.on('connection', socket => {
 });
 
 function incrementGhostCounter() {
-  db.update(
-    { prop: 'allTimeGhostCounter' },
-    { $inc: { count: 1 } },
-    { upsert: true },
-    function () {}
-  );
+  var usersRef = ref.child('statistics');
+  usersRef.set({
+    allTimeGhostCounter: firebase.database.ServerValue.increment(1),
+  });
   allTimeGhostCounter++;
 }
