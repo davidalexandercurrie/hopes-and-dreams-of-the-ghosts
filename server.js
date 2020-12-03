@@ -49,41 +49,29 @@ http.listen(process.env.PORT || 3000, process.env.IP, () => {
   console.log('listening on *:3000');
 });
 
-// on connect initialise a space in the ghost Array
 io.on('connection', socket => {
   onGhostConnect(socket);
-  // when a ghost disconnects
   socket.on('disconnect', () => onGhostDisconnect(socket));
-
-  // receive position of ghost, update position in ghosts Array, reply to sender with ghosts Array minus the sender's entry
   socket.on('position', data => {
     updateAndSendClientGhostData(socket, data);
     sendDataToMax(socket);
   });
 });
 
-const incrementGhostCounter = () => {
-  ref.set({
-    allTimeGhostCounter: firebase.database.ServerValue.increment(1),
-  });
-};
+const incrementGhostCounter = () =>
+  ref.set({ allTimeGhostCounter: firebase.database.ServerValue.increment(1) });
 
-const initGhost = socket => {
+const initGhost = socket =>
   ghosts.push({
     id: socket.id,
-    position: {
-      x: '',
-      y: '',
-    },
+    position: { x: '', y: '' },
     isInClock: false,
     isInBook: false,
     isInLightbulb: false,
   });
-};
 
-const findGhostIndex = socket => {
-  return ghosts.findIndex(item => item.id === socket.id);
-};
+const findGhostIndex = socket =>
+  ghosts.findIndex(item => item.id === socket.id);
 
 const onGhostConnect = socket => {
   console.log(socket.id + ' connected');
