@@ -105,8 +105,8 @@ io.on('connection', socket => {
       startSendingToMax = false;
       setInterval(() => {
         sendToMax.numGhostsConnected = io.engine.clientsCount;
+        console.log(sendToMax.numGhostsConnected);
         socket.broadcast.emit('maxSocket', sendToMax);
-        console.log(sendToMax);
         // socket send to max
       }, 100);
     }
