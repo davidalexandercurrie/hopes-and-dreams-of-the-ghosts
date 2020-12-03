@@ -24,6 +24,15 @@ function draw() {
   updateOtherGhosts();
   updateMyGhost();
   displayAllTimeGhostCounter();
+  rectMode(CENTER);
+  fill('white');
+  stroke('purple');
+  rect(width / 2, height / 2, 1000, 200);
+  fill('purple');
+  strokeWeight(3);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text("JOHN'S GHOST GAME: COMING SOON TO GHOST WORLD!", width / 2, height / 2);
 }
 
 function updateOtherGhosts() {
