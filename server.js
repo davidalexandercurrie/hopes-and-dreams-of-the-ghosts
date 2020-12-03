@@ -20,7 +20,11 @@ firebase.initializeApp(firebaseConfig);
 // firebase.analytics();
 const database = firebase.database();
 let ref = database.ref('statistics');
-ref.on('value', gotData, errData);
+ref.on(
+  'value',
+  data => (allTimeGhostCounter = data.val().allTimeGhostCounter),
+  err => console.log('firebase error', err)
+);
 
 let allTimeGhostCounter;
 let ghosts = [];
@@ -31,13 +35,7 @@ let sendToMax = {
 };
 let startSendingToMax = true;
 
-const gotData = data => {
-  allTimeGhostCounter = data.val().allTimeGhostCounter;
-};
-
-const errData = err => {
-  console.log('firebase error', err);
-};
+// const gotData =
 
 const options = {
   /* ... */
@@ -53,16 +51,14 @@ http.listen(process.env.PORT || 3000, process.env.IP, () => {
 
 // on connect initialise a space in the ghost Array
 io.on('connection', socket => {
-  onGhostConnect();
+  onGhostConnect(socket);
   // when a ghost disconnects
-  socket.on('disconnect', function () {
-    onGhostDisconnect();
-  });
+  socket.on('disconnect', () => onGhostDisconnect(socket));
 
   // receive position of ghost, update position in ghosts Array, reply to sender with ghosts Array minus the sender's entry
   socket.on('position', data => {
-    updateAndSendClientGhostData();
-    sendDataToMax();
+    updateAndSendClientGhostData(socket, data);
+    sendDataToMax(socket);
   });
 });
 
@@ -72,7 +68,7 @@ const incrementGhostCounter = () => {
   });
 };
 
-const initGhost = () => {
+const initGhost = socket => {
   ghosts.push({
     id: socket.id,
     position: {
@@ -85,14 +81,14 @@ const initGhost = () => {
   });
 };
 
-const findGhostIndex = () => {
+const findGhostIndex = socket => {
   return ghosts.findIndex(item => item.id === socket.id);
 };
 
-const onGhostConnect = () => {
+const onGhostConnect = socket => {
   console.log(socket.id + ' connected');
   incrementGhostCounter();
-  initGhost();
+  initGhost(socket);
   let data = {
     ghosts,
     allTimeGhostCounter,
@@ -101,14 +97,14 @@ const onGhostConnect = () => {
   socket.broadcast.emit('ghostConnected', socket.id);
 };
 
-const onGhostDisconnect = () => {
-  let index = findGhostIndex();
+const onGhostDisconnect = socket => {
+  let index = findGhostIndex(socket);
   ghosts.splice(index, 1);
   console.log(socket.id + ' disconnected');
   socket.broadcast.emit('ghostDisconnected', socket.id);
 };
 
-const sendDataToMax = () => {
+const sendDataToMax = socket => {
   sendToMax.ghostsInClock = _.sum(ghosts.map(item => item.isInClock));
   sendToMax.ghostsInBook = _.sum(ghosts.map(item => item.isInBook));
   sendToMax.ghostsInLightbulb = _.sum(ghosts.map(item => item.isInLightbulb));
@@ -123,16 +119,16 @@ const sendDataToMax = () => {
   }
 };
 
-const updateAndSendClientGhostData = () => {
-  let index = findGhostIndex();
+const updateAndSendClientGhostData = (socket, data) => {
+  let index = findGhostIndex(socket);
   ghosts[index].position = { x: data.position.x, y: data.position.y };
   ghosts[index].isInClock = data.isInClock;
   ghosts[index].isInBook = data.isInBook;
   ghosts[index].isInLightbulb = data.isInLightbulb;
   let copy = ghosts.slice(0);
-  let data = {
-    ghosts: copy,
-  };
+  // let data = {
+  //   ghosts: copy,
+  // };
   copy.splice(index, 1);
   socket.emit('ghostArray', copy);
 };
