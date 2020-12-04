@@ -34,6 +34,11 @@ let sendToMax = {
   ghostsInLightbulb: 0,
 };
 let startSendingToMax = true;
+let environment = {
+  bookStatus: 0,
+  clockStatus: 0,
+  lightbulbStatus: 0,
+};
 
 // const gotData =
 
@@ -45,9 +50,9 @@ const io = require('socket.io')(http, options);
 // routes
 app.use('/', express.static('public'));
 
-http.listen(process.env.PORT || 3000, process.env.IP, () => {
-  console.log('listening on *:3000');
-});
+http.listen(process.env.PORT || 3000, process.env.IP, () =>
+  console.log('listening on *:3000')
+);
 
 io.on('connection', socket => {
   onGhostConnect(socket);
@@ -114,9 +119,11 @@ const updateAndSendClientGhostData = (socket, data) => {
   ghosts[index].isInBook = data.isInBook;
   ghosts[index].isInLightbulb = data.isInLightbulb;
   let copy = ghosts.slice(0);
-  // let data = {
-  //   ghosts: copy,
-  // };
   copy.splice(index, 1);
-  socket.emit('ghostArray', copy);
+  let ghostData = {
+    ghosts: copy,
+    environment,
+  };
+
+  socket.emit('ghostArray', ghostData);
 };

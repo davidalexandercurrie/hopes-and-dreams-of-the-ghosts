@@ -24,6 +24,10 @@ function draw() {
   updateOtherGhosts();
   updateMyGhost();
   displayAllTimeGhostCounter();
+  banner();
+}
+
+const banner = () => {
   rectMode(CENTER);
   fill('white');
   stroke('purple');
@@ -33,59 +37,50 @@ function draw() {
   textSize(30);
   textAlign(CENTER, CENTER);
   text("JOHN'S GHOST GAME: COMING SOON TO GHOST WORLD!", width / 2, height / 2);
-}
+};
 
-function updateOtherGhosts() {
-  otherGhosts.forEach(element => {
-    element.ghostReady ? element.show() : null;
-  });
-}
+const updateOtherGhosts = () =>
+  otherGhosts.forEach(element => (element.ghostReady ? element.show() : null));
 
-function updateMyGhost() {
+const updateMyGhost = () => {
   moveMyGhost();
   myGhost.show();
   sendMyGhostData();
-}
+};
 
-function ghostArrayMessage(data) {
-  data.forEach(element => {
-    let index = otherGhosts.findIndex(function (item) {
-      return item.id === element.id;
-    });
+const ghostArrayMessage = ({ ghosts, environment }) => {
+  ghosts.forEach(element => {
+    let index = otherGhosts.findIndex(item => item.id === element.id);
     if (otherGhosts[index] != undefined) {
       otherGhosts[index].updatePosition(element.position.x, element.position.y);
-
       otherGhosts[index].ghostReady = element.position.x === '' ? false : true;
     }
   });
-}
+};
 
-function disconnectedGhostMessage(data) {
+const disconnectedGhostMessage = data => {
   console.log('ghost disconnected', data);
-  let index = otherGhosts.findIndex(function (item) {
-    return item.id === data;
-  });
-  console.log(otherGhosts[index]);
+  let index = otherGhosts.findIndex(item => item.id === data);
   otherGhosts.splice(index, 1);
-}
+};
 
-function connectedGhostMessage(data) {
+const connectedGhostMessage = data => {
   console.log('ghost connected', data);
   otherGhosts.push(new Ghost('', '', data, false));
   allTimeGhostCounter++;
-}
+};
 
-function initExistingGhosts(data) {
+const initExistingGhosts = data => {
   myGhost.ghostReady = true;
-  data.ghosts.forEach(element => {
+  data.ghosts.forEach(element =>
     otherGhosts.push(
       new Ghost(element.position.x, element.position.y, element.id, false)
-    );
-  });
+    )
+  );
   allTimeGhostCounter = data.allTimeGhostCounter;
-}
+};
 
-function sendMyGhostData() {
+const sendMyGhostData = () => {
   if (myGhost.ghostReady) {
     var data = {
       position: { x: myGhost.position.x, y: myGhost.position.y },
@@ -95,9 +90,9 @@ function sendMyGhostData() {
     };
     socket.emit('position', data);
   }
-}
+};
 
-function moveMyGhost() {
+const moveMyGhost = () => {
   if (keyIsDown(87)) {
     myGhost.move(createVector(0, -5));
   }
@@ -110,53 +105,44 @@ function moveMyGhost() {
   if (keyIsDown(68)) {
     myGhost.move(createVector(5, 0));
   }
-}
+};
 
-function createClock() {
-  clock = {
-    position: createVector(400, 400),
-    numberOfGhostsInClock: 0,
-  };
-}
+const createClock = () =>
+  (clock = { position: createVector(400, 400), numberOfGhostsInClock: 0 });
 
-function drawClock() {
+const drawClock = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
   text('⏰', clock.position.x, clock.position.y);
-}
-function createBook() {
-  book = {
-    position: createVector(800, 200),
-    numberOfGhostsInBook: 0,
-  };
-}
+};
+const createBook = () =>
+  (book = { position: createVector(800, 200), numberOfGhostsInBook: 0 });
 
-function drawBook() {
+const drawBook = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
   text('📓', book.position.x, book.position.y);
-}
-function createLightbulb() {
-  lightbulb = {
+};
+const createLightbulb = () =>
+  (lightbulb = {
     position: createVector(200, 800),
     numberOfGhostsInLightbulb: 0,
-  };
-}
+  });
 
-function drawLightbulb() {
+const drawLightbulb = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
   text('💡', lightbulb.position.x, lightbulb.position.y);
-}
+};
 
-function drawEnvironment() {
+const drawEnvironment = () => {
   background(200);
   drawClock();
   drawBook();
   drawLightbulb();
-}
+};
 
-function displayAllTimeGhostCounter() {
+const displayAllTimeGhostCounter = () => {
   if (allTimeGhostCounter != undefined) {
     textAlign(LEFT, CENTER);
     textSize(30);
@@ -167,7 +153,7 @@ function displayAllTimeGhostCounter() {
     fill(0);
     text(`All Time Ghost Counter: ${allTimeGhostCounter}`, 10, 20);
   }
-}
+};
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
