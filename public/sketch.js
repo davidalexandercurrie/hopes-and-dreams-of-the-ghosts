@@ -24,7 +24,7 @@ function draw() {
   updateOtherGhosts();
   updateMyGhost();
   displayAllTimeGhostCounter();
-  banner();
+  // banner();
 }
 
 const banner = () => {
@@ -49,6 +49,7 @@ const updateMyGhost = () => {
 };
 
 const ghostArrayMessage = ({ ghosts, environment }) => {
+  displayHauntStatus(environment);
   ghosts.forEach(element => {
     let index = otherGhosts.findIndex(item => item.id === element.id);
     if (otherGhosts[index] != undefined) {
@@ -158,3 +159,5 @@ const displayAllTimeGhostCounter = () => {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
+
+const displayHauntStatus = () => {};

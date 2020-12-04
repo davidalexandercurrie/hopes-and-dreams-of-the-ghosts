@@ -28,16 +28,21 @@ ref.on(
 
 let allTimeGhostCounter;
 let ghosts = [];
-let sendToMax = {
+let locations = {
   ghostsInBook: 0,
   ghostsInClock: 0,
   ghostsInLightbulb: 0,
 };
 let startSendingToMax = true;
-let environment = {
-  bookStatus: 0,
-  clockStatus: 0,
-  lightbulbStatus: 0,
+
+let gameRound = {
+  gameHasStarted: false,
+  timeStarted: null,
+  environment: {
+    bookStatus: 0,
+    clockStatus: 0,
+    lightbulbStatus: 0,
+  },
 };
 
 // const gotData =
@@ -49,6 +54,7 @@ const io = require('socket.io')(http, options);
 
 // routes
 app.use('/', express.static('public'));
+app.use('/startgame', express.static('startGame'));
 
 http.listen(process.env.PORT || 3000, process.env.IP, () =>
   console.log('listening on *:3000')
@@ -61,6 +67,9 @@ io.on('connection', socket => {
     updateAndSendClientGhostData(socket, data);
     sendDataToMax(socket);
   });
+  socket.on('startGame', msg =>
+    !gameRound.gameHasStarted ? startGame() : console.log('game in progress!')
+  );
 });
 
 const incrementGhostCounter = () =>
@@ -98,15 +107,20 @@ const onGhostDisconnect = socket => {
 };
 
 const sendDataToMax = socket => {
-  sendToMax.ghostsInClock = _.sum(ghosts.map(item => item.isInClock));
-  sendToMax.ghostsInBook = _.sum(ghosts.map(item => item.isInBook));
-  sendToMax.ghostsInLightbulb = _.sum(ghosts.map(item => item.isInLightbulb));
+  locations.ghostsInClock = _.sum(ghosts.map(item => item.isInClock));
+  locations.ghostsInBook = _.sum(ghosts.map(item => item.isInBook));
+  locations.ghostsInLightbulb = _.sum(ghosts.map(item => item.isInLightbulb));
 
   if (startSendingToMax) {
     startSendingToMax = false;
     setInterval(() => {
-      sendToMax.numGhostsConnected = io.engine.clientsCount;
-      socket.broadcast.emit('maxSocket', sendToMax);
+      locations.numGhostsConnected = io.engine.clientsCount;
+      let data = {
+        locations,
+        gameRound,
+      };
+      socket.broadcast.emit('maxSocket', data);
+      console.log(data);
       // socket send to max
     }, 100);
   }
@@ -122,8 +136,53 @@ const updateAndSendClientGhostData = (socket, data) => {
   copy.splice(index, 1);
   let ghostData = {
     ghosts: copy,
-    environment,
+    gameRound,
   };
-
   socket.emit('ghostArray', ghostData);
+};
+
+const startGame = () => {
+  gameRound.gameHasStarted = true;
+  gameRound.timeStarted = Date.now();
+  gameTimer();
+};
+
+const gameTimer = () => {
+  const timer = setInterval(() => {
+    gameRound.environment = {
+      bookStatus:
+        locations.ghostsInBook > 0
+          ? gameRound.environment.bookStatus + locations.ghostsInBook > 300
+            ? 300
+            : gameRound.environment.bookStatus + locations.ghostsInBook
+          : gameRound.environment.bookStatus - 5 < 0
+          ? 0
+          : gameRound.environment.bookStatus - 5,
+      clockStatus:
+        locations.ghostsInClock > 0
+          ? gameRound.environment.clockStatus + locations.ghostsInClock > 300
+            ? 300
+            : gameRound.environment.clockStatus + locations.ghostsInClock
+          : gameRound.environment.clockStatus - 5 < 0
+          ? 0
+          : gameRound.environment.clockStatus - 5,
+      lightbulbStatus:
+        locations.ghostsInLightbulb > 0
+          ? gameRound.environment.lightbulbStatus +
+              locations.ghostsInLightbulb >
+            300
+            ? 300
+            : gameRound.environment.lightbulbStatus +
+              locations.ghostsInLightbulb
+          : gameRound.environment.lightbulbStatus - 5 < 0
+          ? 0
+          : gameRound.environment.lightbulbStatus - 5,
+    };
+    // end game if after set time or if two things have been haunted for 20 seconds
+    if (gameRound.timeStarted + 180000 < Date.now()) {
+      console.log('game ended!');
+      gameRound.gameHasStarted = false;
+      clearInterval(timer);
+    }
+  }, 100);
 };
