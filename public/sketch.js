@@ -8,6 +8,7 @@ let lightbulb = {};
 let allTimeGhostCounter;
 let showBanner = false;
 let bannerText = '';
+let animations = [];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -26,8 +27,9 @@ function draw() {
   drawEnvironment();
   updateOtherGhosts();
   updateMyGhost();
+  animationEffects();
   displayAllTimeGhostCounter();
-  banner(bannerText);
+  banner();
 }
 
 const johnsHouseHoldObjects = () => {
@@ -45,15 +47,11 @@ const eventsFromThePhysicalWorld = data => {
     : null;
 };
 
-const zap = ({ data }) => {
-  console.log(`zap: ${data}`);
-};
-
 const reading = ({ data }) => {
   console.log(`reading: ${data}`);
 };
 
-const banner = bannerText => {
+const banner = () => {
   if (showBanner) {
     rectMode(CENTER);
     fill('white');
@@ -134,10 +132,13 @@ const moveMyGhost = () => {
   if (keyIsDown(68)) {
     myGhost.move(createVector(5, 0));
   }
+  if (myGhost.forceMoveStartTime + myGhost.forceMoveDuration > frameCount) {
+    myGhost.move(myGhost.forceMoveVector);
+  }
 };
 
 const createClock = () =>
-  (clock = { position: createVector(400, 400), numberOfGhostsInClock: 0 });
+  (clock = { position: createVector(800, 800), numberOfGhostsInClock: 0 });
 
 const drawClock = () => {
   textAlign(CENTER, CENTER);
@@ -147,7 +148,7 @@ const drawClock = () => {
   text('🕸', clock.position.x, clock.position.y);
 };
 const createBook = () =>
-  (book = { position: createVector(800, 200), numberOfGhostsInBook: 0 });
+  (book = { position: createVector(1200, 1200), numberOfGhostsInBook: 0 });
 
 const drawBook = () => {
   textAlign(CENTER, CENTER);
@@ -158,7 +159,7 @@ const drawBook = () => {
 };
 const createLightbulb = () =>
   (lightbulb = {
-    position: createVector(200, 800),
+    position: createVector(1800, 800),
     numberOfGhostsInLightbulb: 0,
   });
 
@@ -200,4 +201,41 @@ const endOfGame = winner => {
   bannerText = winner;
   showBanner = true;
   console.log(winner);
+};
+
+const zap = ({ data }) => {
+  console.log(`zap: ${data}`);
+  addAnimationToAnimationList(data, 'zap');
+  if (myGhost.isInClock() && data == 'clock') {
+    let moveVector = createVector(
+      random(10, 20) * (random() < 0.5 ? -1 : 1),
+      random(10, 20) * (random() < 0.5 ? -1 : 1)
+    );
+    let duration = 30;
+    myGhost.forceMoveGhost(moveVector, duration);
+  }
+};
+
+const addAnimationToAnimationList = (location, type) => {
+  animations.push({
+    type,
+    location,
+    startTime: frameCount,
+    duration: 10,
+  });
+};
+
+const animationEffects = () => {
+  animations.forEach((animation, index, animations) => {
+    fill(0, 255, 0);
+    stroke(0, 255, 0);
+    ellipse(
+      clock.position.x + random(-100, 100),
+      clock.position.y + random(-100, 100),
+      random(100, 300)
+    );
+    animation.startTime + animation.duration < frameCount
+      ? animations.splice(index, 1)
+      : null;
+  });
 };

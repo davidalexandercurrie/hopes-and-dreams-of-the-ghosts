@@ -4,6 +4,9 @@ class Ghost {
     this.position = createVector(x, y);
     this.ghostReady = ready;
     this.color = color(random(255), random(255), random(255), 50);
+    this.forceMoveVector = createVector(0, 0);
+    this.forceMoveDuration = 0;
+    this.forceMoveStartTime = 0;
   }
   show() {
     this.styleGhost();
@@ -18,6 +21,11 @@ class Ghost {
   updatePosition(x, y) {
     this.position.x = x;
     this.position.y = y;
+  }
+  forceMoveGhost(vector, duration) {
+    this.forceMoveVector = vector;
+    this.forceMoveStartTime = frameCount;
+    this.forceMoveDuration = duration;
   }
   isMyGhost() {
     return this.id === 'myGhost' ? true : false;
