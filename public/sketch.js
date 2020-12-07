@@ -227,13 +227,34 @@ const addAnimationToAnimationList = (location, type) => {
 
 const animationEffects = () => {
   animations.forEach((animation, index, animations) => {
+    console.log(animation);
     fill(0, 255, 0);
     stroke(0, 255, 0);
-    ellipse(
-      clock.position.x + random(-100, 100),
-      clock.position.y + random(-100, 100),
-      random(100, 300)
-    );
+    let xPosition =
+      animation.location == 'clock'
+        ? clock.position.x
+        : animation.location == 'lightbulb'
+        ? lightbulb.position.x
+        : animation.location == 'book'
+        ? book.position.x
+        : null;
+    let yPosition =
+      animation.location == 'clock'
+        ? clock.position.y
+        : animation.location == 'lightbulb'
+        ? lightbulb.position.y
+        : animation.location == 'book'
+        ? book.position.y
+        : null;
+    if (xPosition != null) {
+      ellipse(
+        xPosition + random(-100, 100),
+        yPosition + random(-100, 100),
+        random(100, 300)
+      );
+    } else {
+      console.log('animation position == null, plz fix');
+    }
     animation.startTime + animation.duration < frameCount
       ? animations.splice(index, 1)
       : null;
