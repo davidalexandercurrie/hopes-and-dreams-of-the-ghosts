@@ -37,6 +37,7 @@ const johnsHouseHoldObjects = () => {
 };
 
 const eventsFromThePhysicalWorld = data => {
+  console.log(data);
   data.type == 'zap'
     ? zap(data)
     : data.type == 'reading'
