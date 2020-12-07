@@ -17,7 +17,7 @@ function setup() {
   socket.on('ghostConnected', connectedGhostMessage);
   socket.on('ghostDisconnected', disconnectedGhostMessage);
   socket.on('endGame', endOfGame);
-  socket.on('zaps', zaps);
+  socket.on('zaps', eventsFromThePhysicalWorld);
   myGhost = new Ghost(random(0, 200), random(0, 200), 'myGhost', false);
   johnsHouseHoldObjects();
 }
@@ -36,8 +36,20 @@ const johnsHouseHoldObjects = () => {
   createLightbulb();
 };
 
-const zaps = data => {
-  console.log(data);
+const eventsFromThePhysicalWorld = data => {
+  data.type == 'zap'
+    ? zap(data)
+    : data.type == 'reading'
+    ? reading(data)
+    : null;
+};
+
+const zap = ({ data }) => {
+  console.log(`zap: ${data}`);
+};
+
+const reading = ({ data }) => {
+  console.log(`reading: ${data}`);
 };
 
 const banner = bannerText => {
