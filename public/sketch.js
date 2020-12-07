@@ -73,7 +73,10 @@ const updateMyGhost = () => {
 };
 
 const ghostArrayMessage = ({ ghosts, gameRound }) => {
-  displayHauntStatus(gameRound);
+  Object.keys(gameRound.environment).forEach(hauntedObject => {
+    houseHoldObjects[hauntedObject].hauntStatus =
+      gameRound.environment[hauntedObject];
+  });
   ghosts.forEach(element => {
     let index = otherGhosts.findIndex(item => item.id === element.id);
     if (otherGhosts[index] != undefined) {
@@ -150,11 +153,6 @@ const drawClock = () => {
     houseHoldObjects.clock.position.y
   );
   textSize(240 + Math.sin(frameCount / 10) * 10);
-  text(
-    '🕸',
-    houseHoldObjects.clock.position.x,
-    houseHoldObjects.clock.position.y
-  );
 };
 const createBook = () =>
   (houseHoldObjects.book = {
@@ -170,8 +168,6 @@ const drawBook = () => {
     houseHoldObjects.book.position.x,
     houseHoldObjects.book.position.y
   );
-  textSize(240 + Math.sin(frameCount / 10) * 10);
-  text('🕸', houseHoldObjects.book.position.x, houseHoldObjects.book.position.y);
 };
 const createLightbulb = () =>
   (houseHoldObjects.lightbulb = {
@@ -184,12 +180,6 @@ const drawLightbulb = () => {
   textSize(240);
   text(
     '💡',
-    houseHoldObjects.lightbulb.position.x,
-    houseHoldObjects.lightbulb.position.y
-  );
-  textSize(240 + Math.sin(frameCount / 10) * 10);
-  text(
-    '🕸',
     houseHoldObjects.lightbulb.position.x,
     houseHoldObjects.lightbulb.position.y
   );
@@ -218,8 +208,6 @@ const displayAllTimeGhostCounter = () => {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
-
-const displayHauntStatus = () => {};
 
 const endOfGame = winner => {
   bannerText = winner;
@@ -282,5 +270,22 @@ const animationEffects = () => {
     animation.startTime + animation.duration < frameCount
       ? animations.splice(index, 1)
       : null;
+  });
+  hauntAnimations();
+};
+
+const hauntAnimations = () => {
+  Object.keys(houseHoldObjects).forEach(key => {
+    textSize(
+      houseHoldObjects[key].hauntStatus * 2 +
+        (houseHoldObjects[key].hauntStatus < 200
+          ? Math.sin(frameCount / 10) * houseHoldObjects[key].hauntStatus
+          : 0)
+    );
+    text(
+      '🕸',
+      houseHoldObjects[key].position.x,
+      houseHoldObjects[key].position.y
+    );
   });
 };

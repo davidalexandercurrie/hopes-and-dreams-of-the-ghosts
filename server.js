@@ -39,9 +39,9 @@ let gameRound = {
   gameHasStarted: false,
   timeStarted: null,
   environment: {
-    bookStatus: 0,
-    clockStatus: 0,
-    lightbulbStatus: 0,
+    book: 0,
+    clock: 0,
+    lightbulb: 0,
   },
 };
 
@@ -152,33 +152,30 @@ const gameTimer = socket => {
   const timer = setInterval(() => {
     console.log(gameRound.environment);
     gameRound.environment = {
-      bookStatus:
+      book:
         locations.ghostsInBook > 0
-          ? gameRound.environment.bookStatus + locations.ghostsInBook > 300
+          ? gameRound.environment.book + locations.ghostsInBook > 300
             ? 300
-            : gameRound.environment.bookStatus + locations.ghostsInBook
-          : gameRound.environment.bookStatus - 5 < 0
+            : gameRound.environment.book + locations.ghostsInBook
+          : gameRound.environment.book - 5 < 0
           ? 0
-          : gameRound.environment.bookStatus - 5,
-      clockStatus:
+          : gameRound.environment.book - 5,
+      clock:
         locations.ghostsInClock > 0
-          ? gameRound.environment.clockStatus + locations.ghostsInClock > 300
+          ? gameRound.environment.clock + locations.ghostsInClock > 300
             ? 300
-            : gameRound.environment.clockStatus + locations.ghostsInClock
-          : gameRound.environment.clockStatus - 5 < 0
+            : gameRound.environment.clock + locations.ghostsInClock
+          : gameRound.environment.clock - 5 < 0
           ? 0
-          : gameRound.environment.clockStatus - 5,
-      lightbulbStatus:
+          : gameRound.environment.clock - 5,
+      lightbulb:
         locations.ghostsInLightbulb > 0
-          ? gameRound.environment.lightbulbStatus +
-              locations.ghostsInLightbulb >
-            300
+          ? gameRound.environment.lightbulb + locations.ghostsInLightbulb > 300
             ? 300
-            : gameRound.environment.lightbulbStatus +
-              locations.ghostsInLightbulb
-          : gameRound.environment.lightbulbStatus - 5 < 0
+            : gameRound.environment.lightbulb + locations.ghostsInLightbulb
+          : gameRound.environment.lightbulb - 5 < 0
           ? 0
-          : gameRound.environment.lightbulbStatus - 5,
+          : gameRound.environment.lightbulb - 5,
     };
     // end game if after set time
     if (gameRound.timeStarted + 180000 < Date.now()) {
@@ -201,21 +198,19 @@ const gameTimer = socket => {
 };
 
 const ghostWinCondition = () =>
-  (gameRound.environment.clockStatus >= 200 &&
-    gameRound.environment.lightbulbStatus >= 200) ||
-  (gameRound.environment.clockStatus >= 200 &&
-    gameRound.environment.bookStatus >= 200) ||
-  (gameRound.environment.lightbulbStatus >= 200 &&
-    gameRound.environment.bookStatus >= 200);
+  (gameRound.environment.clock >= 200 &&
+    gameRound.environment.lightbulb >= 200) ||
+  (gameRound.environment.clock >= 200 && gameRound.environment.book >= 200) ||
+  (gameRound.environment.lightbulb >= 200 && gameRound.environment.book >= 200);
 
 const resetGameData = () => {
   gameRound = {
     gameHasStarted: false,
     timeStarted: null,
     environment: {
-      bookStatus: 0,
-      clockStatus: 0,
-      lightbulbStatus: 0,
+      book: 0,
+      clock: 0,
+      lightbulb: 0,
     },
   };
 };
