@@ -140,9 +140,7 @@ const updateAndSendClientGhostData = (socket, data) => {
   socket.emit('ghostArray', ghostData);
 };
 
-const zaps = data => {
-  io.emit('zaps', data);
-};
+const zaps = data => io.emit('zaps', data);
 
 const startGame = socket => {
   gameRound.gameHasStarted = true;
