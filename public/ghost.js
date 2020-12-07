@@ -32,8 +32,8 @@ class Ghost {
   }
   isInClock() {
     return dist(
-      clock.position.x,
-      clock.position.y,
+      houseHoldObjects.clock.position.x,
+      houseHoldObjects.clock.position.y,
       this.position.x,
       this.position.y
     ) < 120
@@ -42,8 +42,8 @@ class Ghost {
   }
   isInBook() {
     return dist(
-      book.position.x,
-      book.position.y,
+      houseHoldObjects.book.position.x,
+      houseHoldObjects.book.position.y,
       this.position.x,
       this.position.y
     ) < 120
@@ -52,8 +52,8 @@ class Ghost {
   }
   isInLightbulb() {
     return dist(
-      lightbulb.position.x,
-      lightbulb.position.y,
+      houseHoldObjects.lightbulb.position.x,
+      houseHoldObjects.lightbulb.position.y,
       this.position.x,
       this.position.y
     ) < 120
@@ -77,5 +77,14 @@ class Ghost {
     stroke(0, 255, 255);
     fill(this.color);
     rectMode(CENTER);
+  }
+  isInsideThisObject() {
+    return this.isInLightbulb()
+      ? 'lightbulb'
+      : this.isInBook()
+      ? 'book'
+      : this.isInClock()
+      ? 'clock'
+      : null;
   }
 }

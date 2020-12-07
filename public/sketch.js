@@ -2,13 +2,11 @@ let myGhost;
 let otherGhosts = [];
 let socket;
 let positionGhostsArray;
-let clock = {};
-let book = {};
-let lightbulb = {};
 let allTimeGhostCounter;
 let showBanner = false;
 let bannerText = '';
 let animations = [];
+let houseHoldObjects = {};
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -138,27 +136,45 @@ const moveMyGhost = () => {
 };
 
 const createClock = () =>
-  (clock = { position: createVector(800, 800), numberOfGhostsInClock: 0 });
+  (houseHoldObjects.clock = {
+    position: createVector(800, 800),
+    numberOfGhostsInClock: 0,
+  });
 
 const drawClock = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
-  text('⏰', clock.position.x, clock.position.y);
+  text(
+    '⏰',
+    houseHoldObjects.clock.position.x,
+    houseHoldObjects.clock.position.y
+  );
   textSize(240 + Math.sin(frameCount / 10) * 10);
-  text('🕸', clock.position.x, clock.position.y);
+  text(
+    '🕸',
+    houseHoldObjects.clock.position.x,
+    houseHoldObjects.clock.position.y
+  );
 };
 const createBook = () =>
-  (book = { position: createVector(1200, 1200), numberOfGhostsInBook: 0 });
+  (houseHoldObjects.book = {
+    position: createVector(1200, 1200),
+    numberOfGhostsInBook: 0,
+  });
 
 const drawBook = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
-  text('📓', book.position.x, book.position.y);
+  text(
+    '📓',
+    houseHoldObjects.book.position.x,
+    houseHoldObjects.book.position.y
+  );
   textSize(240 + Math.sin(frameCount / 10) * 10);
-  text('🕸', book.position.x, book.position.y);
+  text('🕸', houseHoldObjects.book.position.x, houseHoldObjects.book.position.y);
 };
 const createLightbulb = () =>
-  (lightbulb = {
+  (houseHoldObjects.lightbulb = {
     position: createVector(1800, 800),
     numberOfGhostsInLightbulb: 0,
   });
@@ -166,9 +182,17 @@ const createLightbulb = () =>
 const drawLightbulb = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
-  text('💡', lightbulb.position.x, lightbulb.position.y);
+  text(
+    '💡',
+    houseHoldObjects.lightbulb.position.x,
+    houseHoldObjects.lightbulb.position.y
+  );
   textSize(240 + Math.sin(frameCount / 10) * 10);
-  text('🕸', lightbulb.position.x, lightbulb.position.y);
+  text(
+    '🕸',
+    houseHoldObjects.lightbulb.position.x,
+    houseHoldObjects.lightbulb.position.y
+  );
 };
 
 const drawEnvironment = () => {
@@ -206,7 +230,7 @@ const endOfGame = winner => {
 const zap = ({ data }) => {
   console.log(`zap: ${data}`);
   addAnimationToAnimationList(data, 'zap');
-  if (myGhost.isInClock() && data == 'clock') {
+  if (myGhost.isInsideThisObject() == data) {
     let moveVector = createVector(
       random(10, 20) * (random() < 0.5 ? -1 : 1),
       random(10, 20) * (random() < 0.5 ? -1 : 1)
@@ -232,19 +256,19 @@ const animationEffects = () => {
     stroke(0, 255, 0);
     let xPosition =
       animation.location == 'clock'
-        ? clock.position.x
+        ? houseHoldObjects.clock.position.x
         : animation.location == 'lightbulb'
-        ? lightbulb.position.x
+        ? houseHoldObjects.lightbulb.position.x
         : animation.location == 'book'
-        ? book.position.x
+        ? houseHoldObjects.book.position.x
         : null;
     let yPosition =
       animation.location == 'clock'
-        ? clock.position.y
+        ? houseHoldObjects.clock.position.y
         : animation.location == 'lightbulb'
-        ? lightbulb.position.y
+        ? houseHoldObjects.lightbulb.position.y
         : animation.location == 'book'
-        ? book.position.y
+        ? houseHoldObjects.book.position.y
         : null;
     if (xPosition != null) {
       ellipse(
