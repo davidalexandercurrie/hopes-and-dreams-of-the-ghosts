@@ -70,6 +70,7 @@ io.on('connection', socket => {
   socket.on('startGame', msg =>
     !gameRound.gameHasStarted ? startGame() : console.log('game in progress!')
   );
+  socket.on('msg', socket => zaps(socket, data));
 });
 
 const incrementGhostCounter = () =>
@@ -138,6 +139,10 @@ const updateAndSendClientGhostData = (socket, data) => {
     gameRound,
   };
   socket.emit('ghostArray', ghostData);
+};
+
+const zaps = (socket, data) => {
+  io.emit('zaps');
 };
 
 const startGame = socket => {

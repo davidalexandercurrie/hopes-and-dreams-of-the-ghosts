@@ -17,7 +17,7 @@ function setup() {
   socket.on('ghostConnected', connectedGhostMessage);
   socket.on('ghostDisconnected', disconnectedGhostMessage);
   socket.on('endGame', endOfGame);
-  socket.on('');
+  socket.on('zaps', zaps);
   myGhost = new Ghost(random(0, 200), random(0, 200), 'myGhost', false);
   johnsHouseHoldObjects();
 }
@@ -30,11 +30,15 @@ function draw() {
   banner(bannerText);
 }
 
-function johnsHouseHoldObjects() {
+const johnsHouseHoldObjects = () => {
   createClock();
   createBook();
   createLightbulb();
-}
+};
+
+const zaps = data => {
+  console.log(data);
+};
 
 const banner = bannerText => {
   if (showBanner) {
