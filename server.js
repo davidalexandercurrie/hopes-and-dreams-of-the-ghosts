@@ -70,7 +70,7 @@ io.on('connection', socket => {
   socket.on('startGame', msg =>
     !gameRound.gameHasStarted ? startGame() : console.log('game in progress!')
   );
-  socket.on('msg', socket => zaps(socket, data));
+  socket.on('msg', data => zaps(data));
 });
 
 const incrementGhostCounter = () =>
@@ -121,7 +121,6 @@ const sendDataToMax = socket => {
         gameRound,
       };
       socket.broadcast.emit('maxSocket', data);
-      // socket send to max
     }, 100);
   }
 };
@@ -141,8 +140,8 @@ const updateAndSendClientGhostData = (socket, data) => {
   socket.emit('ghostArray', ghostData);
 };
 
-const zaps = (socket, data) => {
-  io.emit('zaps');
+const zaps = data => {
+  io.emit('zaps', data);
 };
 
 const startGame = socket => {
