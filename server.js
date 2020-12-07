@@ -120,7 +120,6 @@ const sendDataToMax = socket => {
         gameRound,
       };
       socket.broadcast.emit('maxSocket', data);
-      console.log(data);
       // socket send to max
     }, 100);
   }
@@ -141,14 +140,15 @@ const updateAndSendClientGhostData = (socket, data) => {
   socket.emit('ghostArray', ghostData);
 };
 
-const startGame = () => {
+const startGame = socket => {
   gameRound.gameHasStarted = true;
   gameRound.timeStarted = Date.now();
-  gameTimer();
+  gameTimer(socket);
 };
 
-const gameTimer = () => {
+const gameTimer = socket => {
   const timer = setInterval(() => {
+    console.log(gameRound.environment);
     gameRound.environment = {
       bookStatus:
         locations.ghostsInBook > 0
@@ -178,11 +178,42 @@ const gameTimer = () => {
           ? 0
           : gameRound.environment.lightbulbStatus - 5,
     };
-    // end game if after set time or if two things have been haunted for 20 seconds
+    // end game if after set time
     if (gameRound.timeStarted + 180000 < Date.now()) {
-      console.log('game ended!');
+      console.log('Game Ended! Ghost Hunter Wins!');
       gameRound.gameHasStarted = false;
+      io.emit('endGame', 'Hunter Wins!');
+      resetGameData();
       clearInterval(timer);
     }
+    // or if two things have been haunted
+    else if (ghostWinCondition()) {
+      console.log('Game Ended! Ghosts Win!');
+      gameRound.gameHasStarted = false;
+      io.emit('endGame', 'Ghosts Win!');
+
+      clearInterval(timer);
+      resetGameData();
+    }
   }, 100);
+};
+
+const ghostWinCondition = () =>
+  (gameRound.environment.clockStatus >= 200 &&
+    gameRound.environment.lightbulbStatus >= 200) ||
+  (gameRound.environment.clockStatus >= 200 &&
+    gameRound.environment.bookStatus >= 200) ||
+  (gameRound.environment.lightbulbStatus >= 200 &&
+    gameRound.environment.bookStatus >= 200);
+
+const resetGameData = () => {
+  gameRound = {
+    gameHasStarted: false,
+    timeStarted: null,
+    environment: {
+      bookStatus: 0,
+      clockStatus: 0,
+      lightbulbStatus: 0,
+    },
+  };
 };

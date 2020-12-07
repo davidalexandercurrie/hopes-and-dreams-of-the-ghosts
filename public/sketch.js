@@ -6,6 +6,8 @@ let clock = {};
 let book = {};
 let lightbulb = {};
 let allTimeGhostCounter;
+let showBanner = false;
+let bannerText = '';
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -14,29 +16,38 @@ function setup() {
   socket.on('ghostArray', ghostArrayMessage);
   socket.on('ghostConnected', connectedGhostMessage);
   socket.on('ghostDisconnected', disconnectedGhostMessage);
+  socket.on('endGame', endOfGame);
+  socket.on('');
   myGhost = new Ghost(random(0, 200), random(0, 200), 'myGhost', false);
-  createClock();
-  createBook();
-  createLightbulb();
+  johnsHouseHoldObjects();
 }
+
 function draw() {
   drawEnvironment();
   updateOtherGhosts();
   updateMyGhost();
   displayAllTimeGhostCounter();
-  // banner();
+  banner(bannerText);
 }
 
-const banner = () => {
-  rectMode(CENTER);
-  fill('white');
-  stroke('purple');
-  rect(width / 2, height / 2, 1000, 200);
-  fill('purple');
-  strokeWeight(3);
-  textSize(30);
-  textAlign(CENTER, CENTER);
-  text("JOHN'S GHOST GAME: COMING SOON TO GHOST WORLD!", width / 2, height / 2);
+function johnsHouseHoldObjects() {
+  createClock();
+  createBook();
+  createLightbulb();
+}
+
+const banner = bannerText => {
+  if (showBanner) {
+    rectMode(CENTER);
+    fill('white');
+    stroke('purple');
+    rect(width / 2, 200, 400, 200);
+    fill('purple');
+    strokeWeight(3);
+    textSize(30);
+    textAlign(CENTER, CENTER);
+    text(bannerText, width / 2, 200);
+  }
 };
 
 const updateOtherGhosts = () =>
@@ -48,8 +59,8 @@ const updateMyGhost = () => {
   sendMyGhostData();
 };
 
-const ghostArrayMessage = ({ ghosts, environment }) => {
-  displayHauntStatus(environment);
+const ghostArrayMessage = ({ ghosts, gameRound }) => {
+  displayHauntStatus(gameRound);
   ghosts.forEach(element => {
     let index = otherGhosts.findIndex(item => item.id === element.id);
     if (otherGhosts[index] != undefined) {
@@ -115,6 +126,8 @@ const drawClock = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
   text('⏰', clock.position.x, clock.position.y);
+  textSize(240 + Math.sin(frameCount / 10) * 10);
+  text('🕸', clock.position.x, clock.position.y);
 };
 const createBook = () =>
   (book = { position: createVector(800, 200), numberOfGhostsInBook: 0 });
@@ -123,6 +136,8 @@ const drawBook = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
   text('📓', book.position.x, book.position.y);
+  textSize(240 + Math.sin(frameCount / 10) * 10);
+  text('🕸', book.position.x, book.position.y);
 };
 const createLightbulb = () =>
   (lightbulb = {
@@ -134,6 +149,8 @@ const drawLightbulb = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
   text('💡', lightbulb.position.x, lightbulb.position.y);
+  textSize(240 + Math.sin(frameCount / 10) * 10);
+  text('🕸', lightbulb.position.x, lightbulb.position.y);
 };
 
 const drawEnvironment = () => {
@@ -161,3 +178,9 @@ function windowResized() {
 }
 
 const displayHauntStatus = () => {};
+
+const endOfGame = winner => {
+  bannerText = winner;
+  showBanner = true;
+  console.log(winner);
+};
