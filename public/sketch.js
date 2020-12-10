@@ -3,22 +3,17 @@ let otherGhosts = [];
 let socket;
 let positionGhostsArray;
 let allTimeGhostCounter;
-let showBanner = false;
 let bannerText = '';
 let animations = [];
 let houseHoldObjects = {};
+let gameState = 'idle';
+let gameRoundInfoClient;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  socket = io.connect();
-  socket.on('connection', initExistingGhosts);
-  socket.on('ghostArray', ghostArrayMessage);
-  socket.on('ghostConnected', connectedGhostMessage);
-  socket.on('ghostDisconnected', disconnectedGhostMessage);
-  socket.on('endGame', endOfGame);
-  socket.on('zaps', eventsFromThePhysicalWorld);
+  sockets();
   myGhost = new Ghost(random(0, 200), random(0, 200), 'myGhost', false);
-  johnsHouseHoldObjects();
+  createJohnsHouseHoldObjects();
 }
 
 function draw() {
@@ -28,9 +23,21 @@ function draw() {
   animationEffects();
   displayAllTimeGhostCounter();
   banner();
+  timer();
 }
 
-const johnsHouseHoldObjects = () => {
+const sockets = () => {
+  socket = io.connect();
+  socket.on('connection', initExistingGhosts);
+  socket.on('ghostArray', ghostArrayMessage);
+  socket.on('ghostConnected', connectedGhostMessage);
+  socket.on('ghostDisconnected', disconnectedGhostMessage);
+  socket.on('startGame', startOfGame);
+  socket.on('endGame', endOfGame);
+  socket.on('zaps', eventsFromThePhysicalWorld);
+};
+
+const createJohnsHouseHoldObjects = () => {
   createClock();
   createBook();
   createLightbulb();
@@ -50,7 +57,10 @@ const reading = ({ data }) => {
 };
 
 const banner = () => {
-  if (showBanner) {
+  if (
+    gameState == 'ended' &&
+    gameRoundInfoClient.timeEnded + 10000 > Date.now()
+  ) {
     rectMode(CENTER);
     fill('white');
     stroke('purple');
@@ -60,6 +70,24 @@ const banner = () => {
     textSize(30);
     textAlign(CENTER, CENTER);
     text(bannerText, width / 2, 200);
+  }
+};
+
+const timer = () => {
+  textAlign(RIGHT, CENTER);
+  textSize(30);
+  noStroke();
+  fill(0);
+  if (gameState == 'inProgress') {
+    let timeLeft = 180000 - (Date.now() - gameRoundInfoClient.timeStarted);
+    let timeLeftSeconds = Math.floor((timeLeft % 60000) / 1000);
+    text(
+      `Time left: ${Math.floor(timeLeft / 60000)}\:${
+        timeLeftSeconds < 10 ? ' ' + timeLeftSeconds : timeLeftSeconds
+      }`,
+      width - 10,
+      20
+    );
   }
 };
 
@@ -106,6 +134,14 @@ const initExistingGhosts = data => {
     )
   );
   allTimeGhostCounter = data.allTimeGhostCounter;
+  gameRoundInfoClient = data.gameRoundInfo;
+  setGameState();
+};
+
+const setGameState = () => {
+  if (gameRoundInfoClient.gameInProgress) {
+    gameState = 'inProgress';
+  }
 };
 
 const sendMyGhostData = () => {
@@ -121,16 +157,16 @@ const sendMyGhostData = () => {
 };
 
 const moveMyGhost = () => {
-  if (keyIsDown(87)) {
+  if (keyIsDown(87) || keyIsDown(38)) {
     myGhost.move(createVector(0, -5));
   }
-  if (keyIsDown(65)) {
+  if (keyIsDown(65) || keyIsDown(37)) {
     myGhost.move(createVector(-5, 0));
   }
-  if (keyIsDown(83)) {
+  if (keyIsDown(83) || keyIsDown(40)) {
     myGhost.move(createVector(0, 5));
   }
-  if (keyIsDown(68)) {
+  if (keyIsDown(68) || keyIsDown(39)) {
     myGhost.move(createVector(5, 0));
   }
   if (myGhost.forceMoveStartTime + myGhost.forceMoveDuration > frameCount) {
@@ -209,10 +245,19 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-const endOfGame = winner => {
-  bannerText = winner;
-  showBanner = true;
-  console.log(winner);
+const endOfGame = gameRoundInfo => {
+  gameRoundInfoClient = gameRoundInfo;
+  bannerText =
+    gameRoundInfoClient.previousWinner == 'ghosts'
+      ? '👻Ghosts Win!👻'
+      : '😭Ghost Hunter Wins!😭';
+  gameState = 'ended';
+  gameRoundInfo = gameRoundInfo.timeEnded;
+};
+
+const startOfGame = gameRoundInfo => {
+  gameState = 'inProgress';
+  gameRoundInfoClient = gameRoundInfo;
 };
 
 const zap = ({ data }) => {

@@ -35,17 +35,17 @@ let locations = {
 };
 let startSendingToMax = true;
 
-let gameRound = {
-  gameHasStarted: false,
+let gameRoundInfo = {
+  gameInProgress: false,
   timeStarted: null,
+  timeEnded: null,
+  previousWinner: null,
   environment: {
     book: 0,
     clock: 0,
     lightbulb: 0,
   },
 };
-
-// const gotData =
 
 const options = {
   /* ... */
@@ -68,7 +68,9 @@ io.on('connection', socket => {
     sendDataToMax(socket);
   });
   socket.on('startGame', msg =>
-    !gameRound.gameHasStarted ? startGame() : console.log('game in progress!')
+    !gameRoundInfo.gameInProgress
+      ? startGame()
+      : console.log('game in progress!')
   );
   socket.on('msg', data => zaps(data));
 });
@@ -95,6 +97,7 @@ const onGhostConnect = socket => {
   let data = {
     ghosts,
     allTimeGhostCounter,
+    gameRoundInfo,
   };
   socket.emit('connection', data);
   socket.broadcast.emit('ghostConnected', socket.id);
@@ -118,7 +121,7 @@ const sendDataToMax = socket => {
       locations.numGhostsConnected = io.engine.clientsCount;
       let data = {
         locations,
-        gameRound,
+        gameRound: gameRoundInfo,
       };
       socket.broadcast.emit('maxSocket', data);
     }, 100);
@@ -135,7 +138,7 @@ const updateAndSendClientGhostData = (socket, data) => {
   copy.splice(index, 1);
   let ghostData = {
     ghosts: copy,
-    gameRound,
+    gameRound: gameRoundInfo,
   };
   socket.emit('ghostArray', ghostData);
 };
@@ -143,54 +146,55 @@ const updateAndSendClientGhostData = (socket, data) => {
 const zaps = data => io.emit('zaps', data);
 
 const startGame = socket => {
-  gameRound.gameHasStarted = true;
-  gameRound.timeStarted = Date.now();
+  gameRoundInfo.gameInProgress = true;
+  gameRoundInfo.timeStarted = Date.now();
   gameTimer(socket);
+  io.emit('startGame', gameRoundInfo);
 };
 
 const gameTimer = socket => {
   const timer = setInterval(() => {
-    console.log(gameRound.environment);
-    gameRound.environment = {
+    console.log(gameRoundInfo.environment);
+    gameRoundInfo.environment = {
       book:
         locations.ghostsInBook > 0
-          ? gameRound.environment.book + locations.ghostsInBook > 300
+          ? gameRoundInfo.environment.book + locations.ghostsInBook > 300
             ? 300
-            : gameRound.environment.book + locations.ghostsInBook
-          : gameRound.environment.book - 5 < 0
+            : gameRoundInfo.environment.book + locations.ghostsInBook
+          : gameRoundInfo.environment.book - 5 < 0
           ? 0
-          : gameRound.environment.book - 5,
+          : gameRoundInfo.environment.book - 5,
       clock:
         locations.ghostsInClock > 0
-          ? gameRound.environment.clock + locations.ghostsInClock > 300
+          ? gameRoundInfo.environment.clock + locations.ghostsInClock > 300
             ? 300
-            : gameRound.environment.clock + locations.ghostsInClock
-          : gameRound.environment.clock - 5 < 0
+            : gameRoundInfo.environment.clock + locations.ghostsInClock
+          : gameRoundInfo.environment.clock - 5 < 0
           ? 0
-          : gameRound.environment.clock - 5,
+          : gameRoundInfo.environment.clock - 5,
       lightbulb:
         locations.ghostsInLightbulb > 0
-          ? gameRound.environment.lightbulb + locations.ghostsInLightbulb > 300
+          ? gameRoundInfo.environment.lightbulb + locations.ghostsInLightbulb >
+            300
             ? 300
-            : gameRound.environment.lightbulb + locations.ghostsInLightbulb
-          : gameRound.environment.lightbulb - 5 < 0
+            : gameRoundInfo.environment.lightbulb + locations.ghostsInLightbulb
+          : gameRoundInfo.environment.lightbulb - 5 < 0
           ? 0
-          : gameRound.environment.lightbulb - 5,
+          : gameRoundInfo.environment.lightbulb - 5,
     };
     // end game if after set time
-    if (gameRound.timeStarted + 180000 < Date.now()) {
+    if (gameRoundInfo.timeStarted + 180000 < Date.now()) {
       console.log('Game Ended! Ghost Hunter Wins!');
-      gameRound.gameHasStarted = false;
-      io.emit('endGame', 'Hunter Wins!');
+      gameRoundInfo.previousWinner = 'ghostHunter';
+      gameRoundInfo.gameInProgress = false;
       resetGameData();
       clearInterval(timer);
     }
     // or if two things have been haunted
     else if (ghostWinCondition()) {
       console.log('Game Ended! Ghosts Win!');
-      gameRound.gameHasStarted = false;
-      io.emit('endGame', 'Ghosts Win!');
-
+      gameRoundInfo.previousWinner = 'ghosts';
+      gameRoundInfo.gameInProgress = false;
       clearInterval(timer);
       resetGameData();
     }
@@ -198,19 +202,21 @@ const gameTimer = socket => {
 };
 
 const ghostWinCondition = () =>
-  (gameRound.environment.clock >= 200 &&
-    gameRound.environment.lightbulb >= 200) ||
-  (gameRound.environment.clock >= 200 && gameRound.environment.book >= 200) ||
-  (gameRound.environment.lightbulb >= 200 && gameRound.environment.book >= 200);
+  (gameRoundInfo.environment.clock >= 200 &&
+    gameRoundInfo.environment.lightbulb >= 200) ||
+  (gameRoundInfo.environment.clock >= 200 &&
+    gameRoundInfo.environment.book >= 200) ||
+  (gameRoundInfo.environment.lightbulb >= 200 &&
+    gameRoundInfo.environment.book >= 200);
 
 const resetGameData = () => {
-  gameRound = {
-    gameHasStarted: false,
-    timeStarted: null,
-    environment: {
-      book: 0,
-      clock: 0,
-      lightbulb: 0,
-    },
-  };
+  gameRoundInfo.gameInProgress = false;
+  gameRoundInfo.timeStarted = null;
+  gameRoundInfo.timeEnded = Date.now();
+  (gameRoundInfo.environment = {
+    book: 0,
+    clock: 0,
+    lightbulb: 0,
+  }),
+    io.emit('endGame', gameRoundInfo);
 };
