@@ -154,7 +154,6 @@ const startGame = socket => {
 
 const gameTimer = socket => {
   const timer = setInterval(() => {
-    console.log(gameRoundInfo.environment);
     gameRoundInfo.environment = {
       book:
         locations.ghostsInBook > 0
