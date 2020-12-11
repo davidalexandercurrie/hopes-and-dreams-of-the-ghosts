@@ -153,6 +153,7 @@ const startGame = socket => {
 };
 
 const gameTimer = socket => {
+  // restart
   const timer = setInterval(() => {
     gameRoundInfo.environment = {
       book:
