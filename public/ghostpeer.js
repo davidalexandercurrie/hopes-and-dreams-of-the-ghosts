@@ -45,7 +45,7 @@ peer.on('connection', (conn) => {
 //       console.error('Failed to get local stream', err);
 //     });
 // });
-
+console.log('ghostpeer.js loaded.')
 // Initiate outgoing connection
 let connectToPeer = () => {
   let peerId = 'john';

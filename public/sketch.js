@@ -200,7 +200,7 @@ const drawBook = () => {
   textAlign(CENTER, CENTER);
   textSize(240);
   text(
-    '📓',
+    '🪑',
     houseHoldObjects.book.position.x,
     houseHoldObjects.book.position.y
   );
@@ -222,7 +222,8 @@ const drawLightbulb = () => {
 };
 
 const drawEnvironment = () => {
-  background(200);
+  clear();
+  //background(200);
   drawClock();
   drawBook();
   drawLightbulb();
