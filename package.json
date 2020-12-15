@@ -20,6 +20,7 @@
   "homepage": "https://github.com/davidalexandercurrie/hopes-and-dreams-of-the-ghosts#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "peer": "^0.5.3",
     "firebase": "^8.1.1",
     "lodash": "^4.17.20",
     "socket.io": "^3.0.3"

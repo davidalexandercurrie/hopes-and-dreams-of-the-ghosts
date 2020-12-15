@@ -1,4 +1,5 @@
 const express = require('express');
+const { ExpressPeerServer } = require("peer");
 const app = express();
 const http = require('http').createServer(app);
 const _ = require('lodash');
@@ -56,7 +57,7 @@ const io = require('socket.io')(http, options);
 app.use('/', express.static('public'));
 app.use('/startgame', express.static('startGame'));
 
-http.listen(process.env.PORT || 3000, process.env.IP, () =>
+const listener = http.listen(process.env.PORT || 3000, process.env.IP, () =>
   console.log('listening on *:3000')
 );
 
@@ -220,3 +221,12 @@ const resetGameData = () => {
   }),
     io.emit('endGame', gameRoundInfo);
 };
+
+
+// peerjs server
+const peerServer = ExpressPeerServer(listener, {
+  debug: true,
+  path: '/myapp'
+});
+
+app.use('/peerjs', peerServer);
