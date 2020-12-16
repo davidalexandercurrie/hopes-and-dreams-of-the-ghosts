@@ -1,13 +1,23 @@
 // client-side js, loaded by index.html
 // run by the browser each time the page is loaded
 
+
+var canvas = document.querySelector('canvas');
+// var video = document.querySelector('video');
+
+// Optional frames per second argument.
+
+// Set the source of the <video> element to be the stream from the <canvas>.
+// video.srcObject = stream;
+
 let Peer = window.Peer;
 
 
 let videoEl = document.querySelector('.remote-video');
 
-let renderVideo = (stream) => {
-  videoEl.srcObject = stream;
+let renderVideo = (streamey) => {
+  console.log(streamey)
+  videoEl.srcObject = streamey;
 };
 
 // Register with the peer server
@@ -34,17 +44,7 @@ peer.on('connection', (conn) => {
   });
 });
 
-// Handle incoming voice/video connection
-// peer.on('call', (call) => {
-//   navigator.mediaDevices.getUserMedia({video: true, audio: true})
-//     .then((stream) => {
-//       call.answer(stream); // Answer the call with an A/V stream.
-//       call.on('stream', renderVideo);
-//     })
-//     .catch((err) => {
-//       console.error('Failed to get local stream', err);
-//     });
-// });
+
 console.log('ghostpeer.js loaded.')
 // Initiate outgoing connection
 let connectToPeer = () => {
@@ -59,14 +59,25 @@ let connectToPeer = () => {
     conn.send('hi!');
   });
   
-  navigator.mediaDevices.getUserMedia({video: true, audio: true})
-    .then((stream) => {
-      let call = peer.call(peerId, stream);
+  caller()
+  //   .catch((err) => {
+  //     // logMessage('Failed to get local stream', err);
+  //   });;
+  // // 
+
+};
+let call;
+function caller(){
+  console.log('calling')
+  var streamz = canvas.captureStream(1)
+  navigator.mediaDevices.getUserMedia({video: false, audio: true}).
+  then((stream) => {
+       call = peer.call('john', streamz);
       call.on('stream', renderVideo);
     })
-    .catch((err) => {
-      // logMessage('Failed to get local stream', err);
-    });
-};
+  
+}
 
 window.connectToPeer = connectToPeer;
+
+
