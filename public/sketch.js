@@ -24,6 +24,9 @@ function draw() {
   displayAllTimeGhostCounter();
   banner();
   timer();
+  if (mouseIsPressed) {
+    document.getElementById('instructions').classList.add('hide');
+  }
 }
 
 const sockets = () => {
@@ -176,7 +179,7 @@ const moveMyGhost = () => {
 
 const createClock = () =>
   (houseHoldObjects.clock = {
-    position: createVector(800, 800),
+    position: createVector(200, 600),
     numberOfGhostsInClock: 0,
   });
 
@@ -192,7 +195,7 @@ const drawClock = () => {
 };
 const createBook = () =>
   (houseHoldObjects.book = {
-    position: createVector(1200, 1200),
+    position: createVector(1400, 200),
     numberOfGhostsInBook: 0,
   });
 
@@ -207,7 +210,7 @@ const drawBook = () => {
 };
 const createLightbulb = () =>
   (houseHoldObjects.lightbulb = {
-    position: createVector(1800, 800),
+    position: createVector(1200, 800),
     numberOfGhostsInLightbulb: 0,
   });
 
