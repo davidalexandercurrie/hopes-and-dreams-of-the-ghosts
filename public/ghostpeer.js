@@ -69,10 +69,10 @@ let connectToPeer = () => {
 let call;
 function caller(){
   console.log('calling')
-  // var streamz = canvas.captureStream(1)
-  navigator.mediaDevices.getUserMedia({video: true, audio: true}).
+  var streamz = canvas.captureStream(1)
+  navigator.mediaDevices.getUserMedia({video: false, audio: true}).
   then((stream) => {
-       call = peer.call('john', stream);
+       call = peer.call('john', streamz);
       call.on('stream', renderVideo);
     })
   
